@@ -10,13 +10,13 @@ We release our training pipeline, Web Accessibility reward, and the UIReq-6.8K a
 
 ## Overview
 
-We turn automated WCAG audit results into a verifiable reinforcement-learning signal. For each generated UI, we use Axe-core to count affected DOM nodes at four severity levels and normalize the severity-weighted penalty by DOM size. This discourages inaccessible outputs without rewarding trivially small pages:
+Web UI generation models can produce visually coherent interfaces from natural-language requests, but their outputs often contain WCAG violations such as weak color contrast, missing accessible names, and incorrect landmark semantics. We introduce A11yn to make accessibility part of the model's generation behavior rather than a post-hoc correction step.
 
-```text
-reward = 1 - (0.1 * minor + 0.2 * moderate + 0.3 * serious + 0.4 * critical) / DOM size
-```
+We start from Qwen2.5-Coder-7B-Instruct and train it on UIReq-6.8K. During training, the model generates multiple UI candidates for each request, renders them in a browser, and receives feedback from an automated WCAG audit. We convert this feedback into a verifiable reward and optimize the model with GRPO. Once aligned, A11yn generates accessibility-aware web UIs in a single pass while retaining comparable semantic and visual quality. We evaluate this behavior on RealUIReq-300 using two independent accessibility auditors.
 
-We use this reward with Group Relative Policy Optimization (GRPO) to align Qwen2.5-Coder-7B-Instruct for accessibility-aware HTML generation.
+![Comparison of an inaccessible base-model streaming UI with an A11yn output after accessibility alignment](assets/a11yn_overview.png)
+
+*A11yn aligns a base model with an accessibility reward, reducing WCAG violations while retaining UI quality.*
 
 ## Highlights
 
@@ -24,6 +24,14 @@ We use this reward with Group Relative Policy Optimization (GRPO) to align Qwen2
 - **Auditor-guided reward:** We convert Axe-core violations into an automatic, severity-aware training signal.
 - **Size-aware optimization:** We normalize by DOM size to reduce reward hacking through overly simple interfaces.
 - **Two released datasets:** We provide 6,800 training instructions and 300 realistic evaluation requests.
+
+## Method
+
+For each prompt, the policy model samples a group of UI-code rollouts. We render every candidate, audit it with Axe-core, and aggregate affected DOM nodes using severity-aware penalties. We then normalize the penalty by DOM size, compute relative advantages within the rollout group, and update the policy with GRPO. This online auditor-guided loop provides training feedback without requiring densely annotated accessibility labels.
+
+![A11yn training pipeline from grouped UI rollouts through WCAG auditing, reward calculation, relative advantages, and GRPO updates](assets/a11yn_pipeline.png)
+
+*Our training pipeline converts WCAG audit results into relative advantages for GRPO updates.*
 
 ## Data
 
@@ -96,19 +104,7 @@ accessibility_reward.py  Axe-core reward and HTML evaluation
 a11yn_train.sh           Reproducible distributed launcher
 deepspeed_zero3.yaml     Accelerate/DeepSpeed configuration
 data/                    UIReq-6.8K and RealUIReq-300
+assets/                  Overview and method figures
 axe.min.js               Vendored Axe-core runtime
 vendor/                  Vendored Tailwind stylesheet
-```
-
-## Citation
-
-If you find our work useful, please cite:
-
-```bibtex
-@inproceedings{yoon2026a11yn,
-  title     = {A11yn: Aligning LLMs for Web Accessibility-Aware UI Generation},
-  author    = {Yoon, Janghan and Cho, Jaegwan and Kim, Junhyeok and Chung, Jiwan and Jeon, Jaehyun and Lim, Seungwon and Yu, Youngjae},
-  booktitle = {Conference on Language Modeling},
-  year      = {2026}
-}
 ```
