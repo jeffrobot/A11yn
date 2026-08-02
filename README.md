@@ -1,25 +1,29 @@
-# A11yn: Aligning LLMs for Web Accessibility-Aware UI Generation
+# A11yn: Aligning LLMs for Web Accessibility-Aware UI Generation (COLM 2026)
 
-Official code and datasets for the COLM 2026 paper **"A11yn: Aligning LLMs for Web Accessibility-Aware UI Generation."** A11yn (pronounced *align*) post-trains a code-generating LLM to produce web UIs with fewer WCAG violations in a single generation pass.
+This is the official repository for our COLM 2026 paper **"A11yn: Aligning LLMs for Web Accessibility-Aware UI Generation."** In this work, we introduce A11yn (pronounced *align*), a post-training framework that aligns code-generating LLMs to produce web UIs with fewer WCAG violations in a single generation pass.
 
-This repository contains the GRPO training pipeline, the Axe-core accessibility reward, and the UIReq-6.8K and RealUIReq-300 datasets.
+We release our GRPO training pipeline, Axe-core accessibility reward, and the UIReq-6.8K and RealUIReq-300 datasets in this repository.
+
+## News
+
+- **2026:** Our paper was accepted to the Conference on Language Modeling (COLM 2026).
 
 ## Overview
 
-A11yn turns automated WCAG audit results into a verifiable reinforcement-learning signal. For each generated UI, Axe-core counts affected DOM nodes at four severity levels. The severity-weighted penalty is normalized by DOM size to discourage inaccessible outputs without rewarding trivially small pages:
+We turn automated WCAG audit results into a verifiable reinforcement-learning signal. For each generated UI, we use Axe-core to count affected DOM nodes at four severity levels and normalize the severity-weighted penalty by DOM size. This discourages inaccessible outputs without rewarding trivially small pages:
 
 ```text
 reward = 1 - (0.1 * minor + 0.2 * moderate + 0.3 * serious + 0.4 * critical) / DOM size
 ```
 
-The reward is used with Group Relative Policy Optimization (GRPO) to align Qwen2.5-Coder-7B-Instruct for accessibility-aware HTML generation.
+We use this reward with Group Relative Policy Optimization (GRPO) to align Qwen2.5-Coder-7B-Instruct for accessibility-aware HTML generation.
 
 ## Highlights
 
-- **Single-pass generation:** accessibility is learned during post-training rather than added through iterative repair.
-- **Auditor-guided reward:** Axe-core violations provide an automatic, severity-aware training signal.
-- **Size-aware optimization:** DOM normalization reduces reward hacking through overly simple interfaces.
-- **Two released datasets:** 6,800 training instructions and 300 realistic evaluation requests.
+- **Single-pass generation:** We align the model during post-training rather than relying on iterative repair.
+- **Auditor-guided reward:** We convert Axe-core violations into an automatic, severity-aware training signal.
+- **Size-aware optimization:** We normalize by DOM size to reduce reward hacking through overly simple interfaces.
+- **Two released datasets:** We provide 6,800 training instructions and 300 realistic evaluation requests.
 
 ## Data
 
@@ -28,11 +32,11 @@ The reward is used with Group Relative Policy Optimization (GRPO) to align Qwen2
 | UIReq-6.8K | 6,800 | Diverse, instruction-only web UI requests spanning 68 application categories | [`data/UIReq6.8K/uireq6800.json`](data/UIReq6.8K/uireq6800.json) |
 | RealUIReq-300 | 300 | Human-refined, real-page-grounded requests for accessibility and UI-quality evaluation | [`data/RealUIReq300/realuirequest300.json`](data/RealUIReq300/realuirequest300.json) |
 
-UIReq-6.8K is used by the training script. RealUIReq-300 is the evaluation benchmark reported in the paper.
+We use UIReq-6.8K for training and RealUIReq-300 as the primary evaluation benchmark in our paper.
 
 ## Setup
 
-The training stack requires Linux, CUDA-capable NVIDIA GPUs, and a recent Python 3 environment. The paper used four NVIDIA RTX PRO 6000 Blackwell GPUs with 96 GB VRAM each.
+Our training stack requires Linux, CUDA-capable NVIDIA GPUs, and a recent Python 3 environment. We trained the model on four NVIDIA RTX PRO 6000 Blackwell GPUs with 96 GB VRAM each.
 
 ```bash
 git clone https://github.com/jeffrobot/A11yn.git
@@ -49,7 +53,7 @@ Weights & Biases logging is enabled by default. Authenticate with `wandb login`,
 
 ## Training
 
-To run the paper-scale four-GPU configuration:
+To reproduce our paper-scale four-GPU configuration:
 
 ```bash
 GPU_IDS=0,1,2,3 \
@@ -57,7 +61,7 @@ VLLM_GPU_MEMORY_UTILIZATION=0.60 \
 bash a11yn_train.sh
 ```
 
-The launcher defaults to `Qwen/Qwen2.5-Coder-7B-Instruct`, UIReq-6.8K, four GPUs, eight generations per prompt, and output under `outputs/a11yn`.
+Our launcher defaults to `Qwen/Qwen2.5-Coder-7B-Instruct`, UIReq-6.8K, four GPUs, eight generations per prompt, and output under `outputs/a11yn`.
 
 Common overrides:
 
@@ -75,14 +79,14 @@ The accessibility reward renders generated HTML in headless Chromium. External n
 
 ## Main Results
 
-Results below are reported on RealUIReq-300. Lower is better except for Lighthouse.
+We report the following results on RealUIReq-300. Lower is better except for Lighthouse.
 
 | Model | Weighted Violation Score | Lighthouse | IR (Axe) | IR (AChecker) |
 | --- | ---: | ---: | ---: | ---: |
 | Qwen2.5-Coder-7B-Instruct | 4,479 | 90.88 | 0.40 | 0.62 |
 | **A11yn** | **662** | **97.68** | **0.05** | **0.26** |
 
-Relative to the base model, A11yn reduces the Axe inaccessibility rate by **87.5%** and the independently measured AChecker rate by **58.1%**, while preserving comparable semantic and visual quality.
+Compared with the base model, our A11yn model reduces the Axe inaccessibility rate by **87.5%** and the independently measured AChecker rate by **58.1%**, while preserving comparable semantic and visual quality.
 
 ## Repository Structure
 
@@ -97,6 +101,8 @@ vendor/                  Vendored Tailwind stylesheet
 ```
 
 ## Citation
+
+If you find our work useful, please cite:
 
 ```bibtex
 @inproceedings{yoon2026a11yn,
