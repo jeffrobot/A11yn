@@ -2,7 +2,7 @@
 
 This is the official repository for our COLM 2026 paper **"A11yn: Aligning LLMs for Web Accessibility-Aware UI Generation."** In this work, we introduce A11yn (pronounced *align*), a post-training framework that aligns code-generating LLMs to produce web UIs with fewer WCAG violations in a single generation pass.
 
-We release our GRPO training pipeline, Axe-core accessibility reward, and the UIReq-6.8K and RealUIReq-300 datasets in this repository.
+We release our training pipeline, Web Accessibility reward, and the UIReq-6.8K and RealUIReq-300 datasets in this repository.
 
 ## News
 
