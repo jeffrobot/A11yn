@@ -1,4 +1,4 @@
-# A11yn: Aligning LLMs for Web Accessibility-Aware UI Generation (COLM 2026)
+# [COLM 2026] A11yn: Aligning LLMs for Web Accessibility-Aware UI Generation
 
 This is the official repository for our COLM 2026 paper **"A11yn: Aligning LLMs for Web Accessibility-Aware UI Generation."** In this work, we introduce A11yn (pronounced *align*), a post-training framework that aligns code-generating LLMs to produce web UIs with fewer WCAG violations in a single generation pass.
 
